@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from error import ErrorCode, get_error_message
 import sys, json
 
 # Setup BASE directory from either the executable file (build) or from this file (dev)
@@ -27,5 +28,5 @@ def load_setting(key:str) -> Any:
             setting = json.load(file)
         if key in setting:
             return setting.get(key)
-        raise KeyError(f"Key \"{key}\" not found in setting.json.")
-    raise FileNotFoundError("Failed to load setting.json.")
+        raise KeyError(get_error_message(ErrorCode.SETTING_KEY_NOT_FOUND, key=key, file="setting.json"))
+    raise FileNotFoundError(get_error_message(ErrorCode.SETTING_FILE_NOT_FOUND, file="setting.json"))

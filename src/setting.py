@@ -12,6 +12,8 @@ else:
 CONFIG_DIR = BASE_DIR / "config"
 MODULE_DIR = BASE_DIR / "module"
 
+MODULE_EXTENSION = "py"
+
 def load_setting(key:str) -> Any:
     """
         Load a setting from json file base on a specific key

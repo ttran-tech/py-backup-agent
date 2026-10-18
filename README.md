@@ -1,4 +1,4 @@
-# py-backup-agent
+# PyBackupAgent
 
 - A modular, configuration-driven backup automation system designed for dental practice applications on Windows.
 

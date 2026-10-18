@@ -4,12 +4,12 @@
 
 ## Execution Flowchart
 
-<img src="./assets/exec_flowchart.png" width=70%>
+<img src="./assets/exec_flowchart.png" width=80%>
 
 ## Architechture
 
-<img src="./assets/arch.png" width=70%>
+<img src="./assets/arch.png" width=80%>
 
 ## Future Architechture
 
-<img src="./assets/future_arch.png" width=70%>
+<img src="./assets/future_arch.png" width=100%>

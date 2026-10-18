@@ -3,7 +3,7 @@ from log import LogCollector
 from typing import List, Dict
 from types import ModuleType
 from pathlib import Path
-from setting import BASE_DIR, CONFIG_DIR, MODULE_DIR
+from setting import BASE_DIR, CONFIG_DIR, MODULE_DIR, MODULE_EXTENSION
 from error import get_error_message, ErrorCode
 from discord import send_message
 import json
@@ -13,7 +13,7 @@ import importlib.util
 
 # Setup logging and log collector
 collector = LogCollector()
-collector.setLevel(logging.WARNING)
+collector.setLevel(logging.INFO)
 collector.setFormatter(
     logging.Formatter(
         fmt="%(asctime)s - %(levelname)s: %(message)s",
@@ -41,7 +41,10 @@ def load_config() -> List[Dict]:
 
 
 def load_module(module_name:str) -> ModuleType:
-    module_path = MODULE_DIR / f"{module_name}.py"
+    if not module_name.endswith(MODULE_EXTENSION):
+        module_name = f"{module_name}.{MODULE_EXTENSION}"
+
+    module_path = MODULE_DIR / module_name
 
     if not module_path.is_file():
         raise FileNotFoundError(get_error_message(ErrorCode.MODULE_FILE_NOT_FOUND, file=module_name))

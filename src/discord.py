@@ -14,7 +14,7 @@ def send_message(message:str):
     webhook = load_setting("webhookURL")
     payload = {
         "content": message,
-        "username": "Backup Monitor"
+        "username": "Backup Agent"
     }
     response = requests.post(webhook, payload)
     if response.status_code == 204:

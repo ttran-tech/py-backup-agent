@@ -1,0 +1,19 @@
+/*
+    base.json — Base Configuration Template
+
+    This file serves as a base template for creating application-specific configuration files. It defines the expected configuration fields and provides a reference for their structure and usage.
+
+    To create a new configuration, copy this file, rename it for the target application, and update the required fields with the appropriate values.
+*/
+{
+    "version": 1.0,
+    "appName": "Sample Application",
+    "location": "Office1",
+    "hostname": "DC1",
+    "moduleName": "sample",
+    "parameters": {
+        "sourcePath": "",
+        "destPath": ""
+    },
+    "logPath": ""
+}

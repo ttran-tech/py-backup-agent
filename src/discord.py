@@ -11,10 +11,11 @@ def send_message(message:str):
     Args
         message (str): A string message to send to discord channel. 
     """
+    agent_name = load_setting("agentName")
     webhook = load_setting("webhookURL")
     payload = {
         "content": message,
-        "username": "Backup Agent"
+        "username": agent_name
     }
     response = requests.post(webhook, payload)
     if response.status_code == 204:

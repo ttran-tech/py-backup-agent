@@ -26,7 +26,7 @@ def run(params):
         "/e",   # copy sub-directories, include empty one
         "/R:3",  # retry count (3 times)
         "/w:5",  # waiting time between each retry in seconds
-        "/Z_",   # the copy file can be interrupted, allow robocopy to continue where it left off
+        "/Z",   # the copy file can be interrupted, allow robocopy to continue where it left off
         "/NP"   # no show percentate  
     ]
 

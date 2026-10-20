@@ -9,10 +9,10 @@ if getattr(sys, "frozen", False):
 else:
     BASE_DIR = Path(__file__).resolve().parent
 
-CONFIG_DIR = BASE_DIR / "config"
-MODULE_DIR = BASE_DIR / "module"
+MODULE_DIR = BASE_DIR / "modules"
 
 MODULE_EXTENSION = "py"
+BASE_FILES = ["base.json", "base.py"]
 
 def load_setting(key:str) -> Any:
     """

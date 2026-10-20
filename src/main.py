@@ -6,10 +6,14 @@ from pathlib import Path
 from setting import BASE_DIR, MODULE_DIR, MODULE_EXTENSION, BASE_FILES
 from error import get_error_message, ErrorCode
 from discord import send_message
+from datetime import date
 import json
 import logging
 import importlib
 import importlib.util
+
+LOCATION = ""
+SERVER = ""
 
 # Setup logging and log collector
 collector = LogCollector()
@@ -23,6 +27,8 @@ collector.setFormatter(
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
 logging.getLogger().addHandler(collector)
+
+backup_results = []
 
 def load_config() -> List[Dict]:
     config = []
@@ -63,17 +69,59 @@ def load_module(module_name:str, entry_point:str) -> ModuleType:
         spec.loader.exec_module(module)
         return module
 
+def generate_summary(backup_result:List) -> str:
+    if backup_results:
+        success = sum(r["success"] for r in backup_results)
+        failed = len(backup_results) - success
+        date_str = date.today().strftime("%d-%m-%Y")
+        
+        lines = [
+            "```",
+            f"Backup Summary | Date: {date_str}",
+            "",
+            f"Location: {LOCATION}",
+            f"Server:   {SERVER}",
+            "",
+        ]
+        
+        for result in backup_results:
+            status = "[OK]" if result["success"] else "[FAILED]"
+            error_message = "" if result["success"] else f" ({result['error_message']})"
+            lines.append(
+                f"{status} {result['application']}{error_message}"
+            )
+            
+        lines.extend([
+            ""
+            f"Total Jobs: {len(backup_results)}",
+            f"Successful: {success}",
+            f"Failed: {failed}",
+            "",
+            f"Overall Status: {'SUCCESS' if failed == 0 else 'FAILED'}",
+            "```"
+        ])
+        return "\n".join(lines)
+
 def run(configs:List):
+    global LOCATION
+    global SERVER
     for config in configs:
         module_name = config["moduleName"]
         entry_point = config["entryPoint"]
-        param = config["parameters"]
+        LOCATION = config["location"]
+        SERVER = config["server"]
 
         try:
             module = load_module(module_name, entry_point)
-            module.run(param)
+            result = module.run(config)
+            backup_results.append(result)
         except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError) as e:
             logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
+            backup_results.append({
+                "application": config["appName"],
+                "success": False,
+                "error_message": ErrorCode.MODULE_FAIL_TO_LOAD,
+            })
 
 if __name__ == '__main__':
     configs = load_config()
@@ -84,3 +132,5 @@ if __name__ == '__main__':
 
         messages = "\n".join(messages)
         send_message(messages)
+    summary_message = generate_summary(backup_results)
+    send_message(summary_message)

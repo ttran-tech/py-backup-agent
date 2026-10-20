@@ -6,6 +6,7 @@
         "appName": "DentistryApp",
         "location": "Office1",
         "server": "DC1",
+        "type": "Persistent",
         "method": "robocopy",
         "targetDirName": "FlatData",
         "sourcePath": "E:\\Workspace\\python\\BackupTest\\Source\\FlatData",

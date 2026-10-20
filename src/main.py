@@ -92,7 +92,7 @@ def generate_summary(backup_result:List) -> str:
             )
             
         lines.extend([
-            ""
+            "",
             f"Total Jobs: {len(backup_results)}",
             f"Successful: {success}",
             f"Failed: {failed}",

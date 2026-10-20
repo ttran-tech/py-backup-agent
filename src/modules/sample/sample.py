@@ -59,7 +59,7 @@ def run(params) -> Dict:
     result = subprocess.run(command, text=True, errors="replace", check=False)
     exit_code = result.returncode
     if exit_code >= 8:
-        error_message = f"{EXIT_CODES[exit_code]}. Exit code: {exit_code}"
+        error_message = f"{EXIT_CODES[exit_code]} Exit code: {exit_code}"
         logger.error(f"{app_name} at {location}: Robocopy failed to execute. {error_message}")
     else:
         logger.info(f"Backup job for {app_name} at {location} has finished successfully.")

@@ -1,4 +1,6 @@
-- [] Fix the main.py so it read .py file in module but exclude the base.py
+- [x] Fix the main.py so it read .py file in module but exclude the base.py
 - [] Fix the json to have entry point define.
 - [] Fix the json file to move the parameter to the top
-- [] module.run() should return the result.   
+- [] module.run() should return the result.
+- [] update main to generate base module.
+- [] update ERROR_CODE to add new error message from modules

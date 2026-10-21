@@ -10,6 +10,7 @@ else:
     BASE_DIR = Path(__file__).resolve().parent
 
 MODULE_DIR = BASE_DIR / "modules"
+PACKAGE_DIR = BASE_DIR / "packages"
 
 MODULE_EXTENSION = "py"
 BASE_FILES = ["base.json", "base.py"]

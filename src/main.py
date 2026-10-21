@@ -46,7 +46,7 @@ def load_config() -> List[Dict]:
     return config
 
 
-def load_module(module_name:str, entry_point:str) -> ModuleType:
+def load_module(module_name:str, entry_point:str):
     if not entry_point.endswith(MODULE_EXTENSION):
         entry_point = f"{entry_point}.{MODULE_EXTENSION}"
 
@@ -101,6 +101,7 @@ def generate_summary(backup_result:List) -> str:
             "```"
         ])
         return "\n".join(lines)
+    return "Failed to generate BACKUP SUMMARY"
 
 def run(configs:List):
     global LOCATION
@@ -113,6 +114,7 @@ def run(configs:List):
 
         try:
             module = load_module(module_name, entry_point)
+            assert module is not None
             result = module.run(config)
             backup_results.append(result)
         except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError) as e:

@@ -1,7 +1,7 @@
 {
     "version": 1.0,
     "moduleName": "sample",
-    "entryPoint": "sample.py",
+    "entryPoint": "sample.pyd",
     "application": "DentistryApp",
     "location": "Office1",
     "server": "DC1",

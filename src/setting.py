@@ -12,7 +12,7 @@ else:
 MODULE_DIR = BASE_DIR / "modules"
 PACKAGE_DIR = BASE_DIR / "packages"
 
-MODULE_EXTENSION = "py"
+MODULE_EXTENSION = "pyd"
 BASE_FILES = ["base.json", "base.py"]
 
 def load_setting(key:str) -> Any:

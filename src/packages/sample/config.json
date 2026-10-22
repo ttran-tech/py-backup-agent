@@ -1,0 +1,14 @@
+{
+    "version": 1.0,
+    "moduleName": "sample",
+    "entryPoint": "sample.pyd",
+    "application": "DentistryApp",
+    "location": "Office1",
+    "server": "DC1",
+    "type": "Persistent",
+    "method": "robocopy",
+    "targetDirectory": "FlatData",
+    "sourcePath": "E:\\Workspace\\python\\BackupTest\\Source\\FlatData",
+    "destPath": "E:\\Workspace\\python\\BackupTest\\Backup",
+    "logPath": ""
+}

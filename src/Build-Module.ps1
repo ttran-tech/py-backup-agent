@@ -4,6 +4,15 @@ param (
 
 $moduleBaseDir = ".\\modules"
 
+function Test-Checksum {
+    param(
+        [string]$sourceFile,
+        [string]$destFile
+    )
+    return (Get-FileHash -Path $sourceFile -Algorithm SHA256).Hash -eq (Get-FileHash -Path $destFile -Algorithm SHA256).Hash
+}
+
+
 if ($ModuleName -eq "") {
     Write-Host "Usage: .\Build-Module.ps [-ModuleName]"
 }
@@ -36,7 +45,7 @@ else {
     $ouputConfigFile = "$outputDir\\config.json"
     $configFile = "$moduleBaseDir\\$ModuleName\\config.json"
     
-    if (-not(Test-Path -Path $ouputConfigFile -PathType Leaf)) {
+    if (-not(Test-Path -Path $ouputConfigFile -PathType Leaf) -or -not(Test-Checksum -sourceFile $configFile -destFile $ouputConfigFile)) {
         Copy-Item -Path $configFile -Destination $outputDir
     }
 }

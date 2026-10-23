@@ -18,7 +18,7 @@ if ($ModuleName -eq "") {
 }
 else {
     Write-Host "Received module name: $ModuleName"
-    $outputDir = ".\\packages\\$ModuleName"
+    $outputDir = ".\\deploy\\$ModuleName"
     $outputFile = "$outputDir\\$ModuleName.pyd"
 
     # Check if pyd file already exist in the packages

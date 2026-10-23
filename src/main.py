@@ -45,34 +45,9 @@ def load_config() -> List[Dict]:
         except (OSError, ValueError) as e:
             logging.error(get_error_message(ErrorCode.JSON_CONFIG_LOAD_FILE_FAILED, file=file.relative_to(BASE_DIR), error_type=type(e).__name__, error=e))
     return config
-
-
-def load_module(module_name:str, entry_point:str):
-    if not entry_point.endswith(MODULE_EXTENSION):
-        entry_point = f"{entry_point}.{MODULE_EXTENSION}"
-
-    module_path = MODULE_DIR / module_name / entry_point
-    print(f"module_path: {module_path}")
     
-    if not module_path.is_file():
-        raise FileNotFoundError(get_error_message(ErrorCode.MODULE_FILE_NOT_FOUND, file=module_name))
-
-    if module_path.name not in BASE_FILES:
-        # Create module spec - tell Python where the module is and how to load it
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec is None or spec.loader is None:
-            raise ImportError(get_error_message(ErrorCode.MODULE_IMPORT_FAILED, file=module_name))
-        
-        # Create module object
-        module = importlib.util.module_from_spec(spec)
-
-        # Load the module
-        spec.loader.exec_module(module)
-        return module
-    
-def load_module_ex(module_name:str, entry_point:str):
-    if not entry_point.endswith(MODULE_EXTENSION):
-        entry_point = f"{entry_point}.{MODULE_EXTENSION}"
+def load_module_ex(module_name:str):
+    entry_point = f"{module_name}.{MODULE_EXTENSION}"
 
     module_path = PACKAGE_DIR / module_name / entry_point
     print(f"module_path: {module_path}")
@@ -127,17 +102,16 @@ def generate_summary(backup_result:List) -> str:
         return "\n".join(lines)
     return "Failed to generate BACKUP SUMMARY"
 
-def run(configs:List):
+def run():
     global LOCATION
     global SERVER
+    configs = load_config()
     for config in configs:
-        module_name = config["moduleName"]
-        entry_point = config["entryPoint"]
+        module_name = config["module"]
         LOCATION = config["location"]
         SERVER = config["server"]
-
         try:
-            module = load_module_ex(module_name, entry_point)
+            module = load_module_ex(module_name)
             assert module is not None
             result = module.run(config)
             backup_results.append(result)
@@ -151,7 +125,7 @@ def run(configs:List):
 
 if __name__ == '__main__':
     configs = load_config()
-    run(configs=configs)
+    run()
 
     if collector.records:
         messages = [collector.format(record) for record in collector.records]

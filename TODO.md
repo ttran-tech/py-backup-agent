@@ -1,8 +1,8 @@
 - [x] Fix the main.py so it read .py file in module but exclude the base.py
-- ~~[ ] Fix the json to have entry point define.~~
+- [ ] ~~Fix the json to have entry point define.~~
 - [x] Fix the json file to move the parameter to the top level
 - [x] module.run() should return the result.
 - [x] ~~Update main to generate base module.~~ Implemented in PS script (refer to New-Module.ps1)
-- [ ] ~~Update ERROR_CODE to add new error message from modules~~ Replace with Dependency Injection
+- [ ] ~~Update ERROR_CODE to add new error message from modules~~ Module will implement its own error handling.
 - [ ] Implement dependency injection for module.run()
 - [ ] Implement module package pack function

@@ -68,7 +68,7 @@ def load_module_ex(module_name:str):
         spec.loader.exec_module(module)
         return module
 
-def generate_summary(backup_result:List) -> str:
+def generate_summary(backup_results:List) -> str:
     if backup_results:
         success = sum(r["success"] for r in backup_results)
         failed = len(backup_results) - success

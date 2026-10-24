@@ -59,7 +59,6 @@ function New-ConfigFile() {
     "location" : "",    // Office Location  (required)
     "server" : "",      // Server Name      (required)
     "type" : "",        // Backup Type: SQL, persistent (Required)
-    "logPath" : "",     // Path to log file (Optional)
     
     // Define others module's parameters here
 }

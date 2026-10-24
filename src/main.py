@@ -46,7 +46,7 @@ def load_config() -> List[Dict]:
             logging.error(get_error_message(ErrorCode.JSON_CONFIG_LOAD_FILE_FAILED, file=file.relative_to(BASE_DIR), error_type=type(e).__name__, error=e))
     return config
     
-def load_module_ex(module_name:str):
+def load_module_ex(module_name:str) -> ModuleType | None:
     entry_point = f"{module_name}.{MODULE_EXTENSION}"
 
     module_path = PACKAGE_DIR / module_name / entry_point

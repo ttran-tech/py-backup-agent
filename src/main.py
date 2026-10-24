@@ -33,7 +33,7 @@ backup_results = []
 
 def load_config() -> List[Dict]:
     config = []
-    json_files = [file for file in Path(MODULE_DIR).rglob("*.json") if file.is_file() and file.name not in BASE_FILES]
+    json_files = [file for file in Path(MODULE_DIR).rglob("*.jsonc") if file.is_file() and file.name not in BASE_FILES]
 
     for file in json_files:
         try:

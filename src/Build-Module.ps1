@@ -14,7 +14,7 @@ function Test-Checksum {
 
 
 if ($ModuleName -eq "") {
-    Write-Host "Usage: .\Build-Module.ps [-ModuleName]"
+    Write-Host "Usage: .\Build-Module.ps1 [-ModuleName]"
 }
 else {
     Write-Host "Received module name: $ModuleName"
@@ -42,8 +42,8 @@ else {
         Write-Host "Rename completed."
     }
 
-    $ouputConfigFile = "$outputDir\\config.json"
-    $configFile = "$moduleBaseDir\\$ModuleName\\config.json"
+    $ouputConfigFile = "$outputDir\\config.jsonc"
+    $configFile = "$moduleBaseDir\\$ModuleName\\config.jsonc"
     
     if (-not(Test-Path -Path $ouputConfigFile -PathType Leaf) -or -not(Test-Checksum -sourceFile $configFile -destFile $ouputConfigFile)) {
         Copy-Item -Path $configFile -Destination $outputDir

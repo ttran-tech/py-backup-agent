@@ -2,7 +2,6 @@ from typing import Dict
 from pathlib import Path
 import subprocess
 import logging
-import sys
 
 MODULE_DIR = Path(__compiled__.containing_dir).resolve() # type: ignore
 

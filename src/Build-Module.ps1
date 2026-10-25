@@ -41,11 +41,13 @@ else {
         Rename-Item -Path "$outputDir\\$targetFile" -NewName "$ModuleName.pyd"
         Write-Host "Rename completed."
     }
-
-    $ouputConfigFile = "$outputDir\\config.jsonc"
-    $configFile = "$moduleBaseDir\\$ModuleName\\config.jsonc"
     
-    if (-not(Test-Path -Path $ouputConfigFile -PathType Leaf) -or -not(Test-Checksum -sourceFile $configFile -destFile $ouputConfigFile)) {
-        Copy-Item -Path $configFile -Destination $outputDir
+    if (-not(Test-Path "$moduleBaseDir\\$ModuleName\\*.jsonc" )) {
+        $ouputConfigFile = "$outputDir\\config.jsonc"
+        $configFile = "$moduleBaseDir\\$ModuleName\\config.jsonc"
+        if (-not(Test-Path -Path $ouputConfigFile -PathType Leaf) -or -not(Test-Checksum -sourceFile $configFile -destFile $ouputConfigFile)) {
+            Copy-Item -Path $configFile -Destination $outputDir
+        }
     }
+
 }

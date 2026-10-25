@@ -6,7 +6,7 @@
     "server": "DC1",
     "type": "Persistent",
     "method": "robocopy",
-    "targetDirectory": "FlatData",
+    "targetDirectory": "",
     "sourcePath": "C:\\Workspace\\python\\BackupTest\\Source\\DentiView_Imaging",
     "destPath": "C:\\Workspace\\python\\BackupTest\\DentiView_Imaging_Backup"
 }

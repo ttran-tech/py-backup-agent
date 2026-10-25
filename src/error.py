@@ -8,6 +8,7 @@ class ErrorCode(IntEnum):
     JSON_CONFIG_EMPTY_DICT = 0x2001
     JSON_CONFIG_LOAD_FILE_FAILED = 0x2002
 
+    MODULE_EXECUTE_SUCCESS = 0x3000
     MODULE_FILE_NOT_FOUND = 0x3001
     MODULE_IMPORT_FAILED = 0x3002
     MODULE_FAIL_TO_LOAD = 0x3003
@@ -25,6 +26,7 @@ _ERROR_MESSAGES = {
     ErrorCode.JSON_CONFIG_LOAD_FILE_FAILED: "Failed to load config file: {file}. {error_type}: {error}",
 
     # Module message
+    ErrorCode.MODULE_EXECUTE_SUCCESS: "Module executed successfully. Module Name: {module_name}",
     ErrorCode.MODULE_FILE_NOT_FOUND: "Failed to load module: {file}",
     ErrorCode.MODULE_IMPORT_FAILED: "Failed to import module: {file}",
     ErrorCode.MODULE_FAIL_TO_LOAD: "Failed to load module: {file}. {error_type}: {error}",

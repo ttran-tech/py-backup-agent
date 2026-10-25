@@ -11,9 +11,17 @@ else:
 
 MODULE_DIR = BASE_DIR / "modules"
 PACKAGE_DIR = BASE_DIR / "deploy"
+LOG_DIR = BASE_DIR / "logs"
 
 MODULE_EXTENSION = "pyd"
 BASE_FILES = ["base.json", "base.py"]
+
+def check_deploy_environment():
+    if not PACKAGE_DIR.exists() or not PACKAGE_DIR.is_dir():
+        Path(PACKAGE_DIR).mkdir(exist_ok=True)
+
+    if not LOG_DIR.exists() or not LOG_DIR.is_dir():
+        Path(LOG_DIR).mkdir(exist_ok=True)
 
 def load_setting(key:str) -> Any:
     """

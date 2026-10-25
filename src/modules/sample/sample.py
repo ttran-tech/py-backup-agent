@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Any
 from pathlib import Path
 import subprocess
 import logging
@@ -25,22 +25,19 @@ EXIT_CODES = {
     16: "Fatal Error: Serious failure. No files copied."
 }
 
-def get_timestamp() -> str:
-    from datetime import datetime
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
-
-def run(params) -> Dict:
+def run(params:Dict, service) -> Dict:
     app_name = params.get("application")
     location = params.get("location")
     backup_type = params.get("type")
-    src_path = Path(params.get("sourcePath"))
-    dest_path = Path(params.get("destPath"))
+    src_path = Path(str(params.get("sourcePath")))
+    dest_path = Path(str(params.get("destPath")))
     target_dirname = params.get("targetDirectory")
     error_message = ""
 
-    backup_name = f"{get_timestamp()}_{location}_{app_name}_{target_dirname}"
+    backup_name = f"{service.get_timestamp()}_{location}_{app_name}_{target_dirname}"
     dest_path = dest_path / backup_name
 
+    service.send_message(f"Start backup job for **{app_name}** at **{location}**. Backup type: *{backup_type}*")
     logger.info(f"Start backup job for {app_name} at {location}. Backup type: {backup_type}")
     
     command = [
@@ -50,7 +47,7 @@ def run(params) -> Dict:
         "/e",   # copy sub-directories, include empty one
         "/R:3",  # retry count (3 times)
         "/w:5",  # waiting time between each retry in seconds
-        "/Z_",   # the copy file can be interrupted, allow robocopy to continue where it left off
+        "/Z",   # the copy file can be interrupted, allow robocopy to continue where it left off
         "/NP"   # no show percentate  
     ]
 
@@ -59,9 +56,11 @@ def run(params) -> Dict:
     exit_code = result.returncode
     if exit_code >= 8:
         error_message = f"{EXIT_CODES[exit_code]} Exit code: {exit_code}"
+        service.send_message(f"**{app_name}** at **{location}**: Robocopy failed to execute. *{error_message}* | Status: [FAILED]")
         logger.error(f"{app_name} at {location}: Robocopy failed to execute. {error_message}")
     else:
-        logger.info(f"Backup job for {app_name} at {location} has finished successfully.")
+        service.send_message(f"Backup job for **{app_name}** at **{location}** has finished successfully.")
+        logger.info(f"Backup job for {app_name} at {location} has finished | Status: [SUCCESS]")
     return {
         "application": app_name,
         "success": (False if exit_code >= 8 else True),

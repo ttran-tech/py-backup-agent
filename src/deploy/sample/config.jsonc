@@ -7,7 +7,6 @@
     "type": "Persistent",
     "method": "robocopy",
     "targetDirectory": "FlatData",
-    "sourcePath": "E:\\Workspace\\python\\BackupTest\\Source\\FlatData",
-    "destPath": "E:\\Workspace\\python\\BackupTest\\Backup",
-    "logPath": ""
+    "sourcePath": "C:\\Workspace\\python\\BackupTest\\Source\\FlatData",
+    "destPath": "C:\\Workspace\\python\\BackupTest\\Backup"
 }

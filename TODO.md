@@ -4,5 +4,5 @@
 - [x] module.run() should return the result.
 - [x] ~~Update main to generate base module.~~ Implemented in PS script (refer to New-Module.ps1)
 - [ ] ~~Update ERROR_CODE to add new error message from modules~~ Module will implement its own error handling.
-- [ ] Implement dependency injection for module.run()
-- [ ] Implement module package pack function
+- [x] Implement dependency injection for module.run()
+- [x] Implement module package pack function

@@ -18,6 +18,7 @@ import importlib
 import importlib.util
 import socket
 import os
+import concurrent.futures
 
 LOCATION = ""
 SERVER = ""
@@ -54,18 +55,18 @@ def load_module_ex(module_name:str) -> ModuleType | None:
     if not module_path.is_file():
         raise FileNotFoundError(get_error_message(ErrorCode.MODULE_FILE_NOT_FOUND, file=module_name))
 
-    if module_path.name not in BASE_FILES:
+    #if module_path.name not in BASE_FILES:
         # Create module spec - tell Python where the module is and how to load it
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        if spec is None or spec.loader is None:
-            raise ImportError(get_error_message(ErrorCode.MODULE_IMPORT_FAILED, file=module_name))
-        
-        # Create module object
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        # Load the module
-        spec.loader.exec_module(module)
-        return module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+    if spec is None or spec.loader is None:
+        raise ImportError(get_error_message(ErrorCode.MODULE_IMPORT_FAILED, file=module_name))
+    
+    # Create module object
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = module
+    # Load the module
+    spec.loader.exec_module(module)
+    return module
 
 def generate_summary(backup_results:List) -> str:
     get_machine_info()
@@ -114,30 +115,48 @@ def get_machine_info():
     if SERVER == "":
         SERVER = socket.gethostname()
 
+def execute_module(config:Dict, module:ModuleType) ->List:
+    result_list = []
+    module_name = config["module"]
+    application = config["application"]
+    try:
+        # assert module is not None
+        result = module.run(config, service)
+        result_list.append(result)
+        if result["success"]:
+            logging.info(get_error_message(ErrorCode.MODULE_EXECUTE_SUCCESS, module_name=module_name))
+    except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError, Exception) as e:
+        logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
+        result_list.append({
+            "application": application,
+            "success": False,
+            "error_message": ErrorCode.MODULE_FAIL_TO_LOAD,
+        })
+    return result_list
 
 def run():
     # set up logging
     log_path = LOG_DIR / f"{get_timestamp()}_BackupAgent.log"
     logging.basicConfig(filename=log_path, level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
     configs = load_config()
+    module_registry = {}
+    # To avoid race condition when BackupAgent tries to load the same module for the same backup job,
+    # load and register the module to the module_registry to ensure a module is only loaded once.
     for config in configs:
-        log_path = Path()
         module_name = config["module"]
-        application = config["application"]
-        try:
-            module = load_module_ex(module_name)
-            assert module is not None
-            result = module.run(config, service)
-            backup_results.append(result)
-            if result["success"]:
-                logging.info(get_error_message(ErrorCode.MODULE_EXECUTE_SUCCESS, module_name=module_name))
-        except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError) as e:
-            logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
-            backup_results.append({
-                "application": application,
-                "success": False,
-                "error_message": ErrorCode.MODULE_FAIL_TO_LOAD,
-            })
+        if module_name not in module_registry.keys():
+            try:
+                module_registry[module_name] = load_module_ex(module_name=module_name)
+            except ModuleNotFoundError as e:
+                logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
+                module_registry[module_name] = None
+
+    # for config in configs:
+    #     backup_results.extend(execute_module(config=config))
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [executor.submit(execute_module, config, module_registry[config["module"]]) for config in configs]
+        for future in concurrent.futures.as_completed(futures):
+            backup_results.extend(future.result())
     summary_message = generate_summary(backup_results)
     send_message(summary_message)
 

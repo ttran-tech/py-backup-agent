@@ -1,11 +1,12 @@
 param (
-    [parameters(Mandatory=$True)]
+    [Parameter(Mandatory=$True)]
     [string]$ModuleName,
     [string]$Application,
     [string]$Location,
     [string]$Server,
 
     [string]$BackupType
+    [bool]
 )
 
 New-Variable -Name BASE_DIR -Value ".\\modules" -Option Constant
@@ -43,9 +44,57 @@ function New-ModuleFile() {
     $template =
     @"
 from typing import Dict
+from pathlib import Path
+import logging
 
-def run(param:Dict) -> Dict:
-    pass
+MODULE_DIR = Path(__compiled__.containing_dir).resolve() # type: ignore
+logger = None
+
+def init_log(params:Dict, service):
+    global logger
+    module_name = params.get("module")
+    app_name = params.get("application")
+    location = params.get("location")
+    backup_type = params.get("type")
+
+    timestamp = service.get_timestamp()
+
+    # Setup logging
+    logger = logging.Logger(str(module_name))
+    logger.setLevel(logging.INFO)
+
+    # Setup log folder
+    log_dir = MODULE_DIR / "logs"
+    if not log_dir.exists() or not log_dir.is_dir():
+        Path(log_dir).mkdir()
+    log_path = log_dir / f"{timestamp}_{module_name}_{app_name}_{backup_type}.log"
+
+    # Setup file handler
+    handler = logging.FileHandler(log_path)
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
+    )
+    logger.addHandler(handler)
+
+####################################################################################################
+# Add module code below:
+# def custom_module():
+#   pass
+
+def run(params:Dict, service) -> Dict | None:
+    """ 
+        This function is called by BackupAgent to execute a custom backup job.
+    
+        Args:
+            params (Dict): Parameters defined in config.jsonc.
+            service (ModuleService): a set of shared functions from BackupAgent that can be called from run() (or pass to another functions).
+                Current ModuleService:
+                    service.send_message(message:str):  send a message to Discord webhook.
+                    service.get_timestamp() -> str:     get current time stamp.     
+    """
+    init_log(params, service)
+
+    # Add module code below
 "@
     $moduleFilePath = "$ModulePath\\$ModuleName.py"
     Set-Content -Path $moduleFilePath -Value $template
@@ -100,6 +149,6 @@ if ($ModuleName -ne "") {
     Invoke-Main -ModuleName $ModuleName
 }
 else {
-    Write-Host "Usage: .\New-Module.ps1 [-ModuleName]"
+    Write-Host "Usage: .\New-Module.ps1 -ModuleName [ModuleName] -Application [AppName] -Location [Location] -Server [ServerName] [[-BackupType]]"
     Exit 1
 }

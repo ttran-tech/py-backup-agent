@@ -1,6 +1,6 @@
 {
     "version": 1.0,
-    "module": "sample",
+    "module": "persistent_backup",
     "application": "DentistryApp",
     "location": "Office1",
     "server": "DC1",

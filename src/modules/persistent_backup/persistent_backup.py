@@ -25,6 +25,9 @@ EXIT_CODES = {
     16: "Fatal Error: Serious failure. No files copied."
 }
 
+def get_directory_size(dir_path:Path) -> int:
+    return sum(f.stat().st_size for f in dir_path.rglob("*") if f.is_file())
+
 def run(params:Dict, service) -> Dict:
     module_name = params.get("module")
     app_name = params.get("application")
@@ -68,19 +71,25 @@ def run(params:Dict, service) -> Dict:
         "/R:3",  # retry count (3 times)
         "/w:5",  # waiting time between each retry in seconds
         "/Z",   # the copy file can be interrupted, allow robocopy to continue where it left off
-        "/NP"   # no show percentate  
+        "/NP",   # no show percentate
+        f"/LOG+:{log_path}"
     ]
 
-    print(" ".join(command))
+    logger.info(f"Execute Command: {" ".join(command)}")
     result = subprocess.run(command, text=True, errors="replace", check=False)
+    source_size = get_directory_size(src_path)
+    backup_size = get_directory_size(dest_path)
+    size_message = f"Size of Source: {source_size} bytes | Size of Backup: {backup_size} bytes"
     exit_code = result.returncode
+    response_message = ""
     if exit_code >= 8:
         error_message = f"{EXIT_CODES[exit_code]} Exit code: {exit_code}"
-        service.send_message(f"**{app_name}** at **{location}**: Robocopy failed to execute. *{error_message}* | Status: [FAILED]")
-        logger.error(f"{app_name} at {location}: Robocopy failed to execute. {error_message}")
+        response_message = f"[{app_name}] at [{location}]: Robocopy failed to execute. *{error_message}* | Status: [FAILED] | {size_message}"
+        logger.error(response_message)
     else:
-        service.send_message(f"Backup job for **{app_name}** at **{location}** has finished successfully.")
-        logger.info(f"Backup job for {app_name} at {location} has finished | Status: [SUCCESS]")
+        response_message = f"Backup job for [{app_name}] at [{location}] has finished successfully. | {size_message}"
+        logger.info(response_message)
+    service.send_message(response_message)
     return {
         "application": app_name,
         "success": (False if exit_code >= 8 else True),

@@ -1,5 +1,11 @@
 param (
-    [string]$ModuleName
+    [parameters(Mandatory=$True)]
+    [string]$ModuleName,
+    [string]$Application,
+    [string]$Location,
+    [string]$Server,
+
+    [string]$BackupType
 )
 
 New-Variable -Name BASE_DIR -Value ".\\modules" -Option Constant
@@ -54,11 +60,11 @@ function New-ConfigFile() {
     @"
 {
     "version": 1.0,
-    "module": "$ModuleName",  // Mandatory
-    "application" : "", // Application Name (required)
-    "location" : "",    // Office Location  (required)
-    "server" : "",      // Server Name      (required)
-    "type" : "",        // Backup Type: SQL, persistent (Required)
+    "module": "$ModuleName",        // require
+    "application" : "$Application", // Application Name (required)
+    "location" : "$Location",       // Office Location  (required)
+    "server" : "$Server",           // Server Name      (required)
+    "type" : "$BackupType",         // Backup Type: SQL, persistent (Required)
     
     // Define others module's parameters here
 }

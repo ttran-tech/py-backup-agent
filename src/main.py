@@ -4,8 +4,8 @@ from pathlib import Path
 from datetime import date
 
 from log import LogCollector, create_logfile, write_log
-from setting import BASE_DIR, MODULE_EXTENSION, BASE_FILES, PACKAGE_DIR
-from setting import check_deploy_environment
+from setting import BASE_DIR, MODULE_EXTENSION, BASE_FILES, PACKAGE_DIR, LOG_DIR
+from setting import check_deploy_environment, load_setting
 from error import get_error_message, ErrorCode
 from discord import send_message
 from common import get_timestamp
@@ -16,22 +16,12 @@ import sys
 import logging
 import importlib
 import importlib.util
+import socket
+import os
 
 LOCATION = ""
 SERVER = ""
 
-# Setup logging and log collector
-collector = LogCollector()
-collector.setLevel(logging.INFO)
-collector.setFormatter(
-    logging.Formatter(
-        fmt="%(asctime)s - %(levelname)s: %(message)s",
-        datefmt="[%Y-%m-%d %H:%M:%S]"
-    )
-)
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
-logging.getLogger().addHandler(collector)
 
 backup_results = []
 
@@ -78,6 +68,7 @@ def load_module_ex(module_name:str) -> ModuleType | None:
         return module
 
 def generate_summary(backup_results:List) -> str:
+    get_machine_info()
     if backup_results:
         success = sum(r["success"] for r in backup_results)
         failed = len(backup_results) - success
@@ -111,24 +102,35 @@ def generate_summary(backup_results:List) -> str:
         return "\n".join(lines)
     return "Failed to generate BACKUP SUMMARY"
 
-def run():
+def get_machine_info():
     global LOCATION
     global SERVER
+    LOCATION = load_setting("location")
+    SERVER = load_setting("server")
 
+    if LOCATION == "":
+        LOCATION = (os.environ.get("LOGONSERVER")).strip("\\") # type: ignore
+
+    if SERVER == "":
+        SERVER = socket.gethostname()
+
+
+def run():
+    # set up logging
+    log_path = LOG_DIR / f"{get_timestamp()}_BackupAgent.log"
+    logging.basicConfig(filename=log_path, level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
     configs = load_config()
     for config in configs:
         log_path = Path()
         module_name = config["module"]
         application = config["application"]
-        backup_type = config["type"]
-        LOCATION = config["location"]
-        SERVER = config["server"]
         try:
-            log_path = create_logfile(module_name, application, backup_type)
             module = load_module_ex(module_name)
             assert module is not None
             result = module.run(config, service)
             backup_results.append(result)
+            if result["success"]:
+                logging.info(get_error_message(ErrorCode.MODULE_EXECUTE_SUCCESS, module_name=module_name))
         except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError) as e:
             logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
             backup_results.append({
@@ -136,13 +138,6 @@ def run():
                 "success": False,
                 "error_message": ErrorCode.MODULE_FAIL_TO_LOAD,
             })
-        finally:
-            if collector.records:
-                log_content = [collector.format(record) for record in collector.records]
-                log_content = "\n".join(log_content)
-                write_log(log_path, log_content)
-                collector.records.clear()
-
     summary_message = generate_summary(backup_results)
     send_message(summary_message)
 

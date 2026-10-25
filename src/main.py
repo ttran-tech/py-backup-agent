@@ -1,12 +1,16 @@
-from setting import load_setting
-from log import LogCollector
 from typing import List, Dict
 from types import ModuleType
 from pathlib import Path
-from setting import BASE_DIR, MODULE_DIR, MODULE_EXTENSION, BASE_FILES, PACKAGE_DIR
+from datetime import date
+
+from log import LogCollector, create_logfile, write_log
+from setting import BASE_DIR, MODULE_EXTENSION, BASE_FILES, PACKAGE_DIR
+from setting import check_deploy_environment
 from error import get_error_message, ErrorCode
 from discord import send_message
-from datetime import date
+from common import get_timestamp
+from service import ModuleService
+
 import json
 import sys
 import logging
@@ -30,6 +34,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s: %(m
 logging.getLogger().addHandler(collector)
 
 backup_results = []
+
+service = ModuleService(
+    send_message=send_message,
+    get_timestamp=get_timestamp,
+)
 
 def load_config() -> List[Dict]:
     config = []
@@ -105,32 +114,39 @@ def generate_summary(backup_results:List) -> str:
 def run():
     global LOCATION
     global SERVER
+
     configs = load_config()
     for config in configs:
+        log_path = Path()
         module_name = config["module"]
+        application = config["application"]
+        backup_type = config["type"]
         LOCATION = config["location"]
         SERVER = config["server"]
         try:
+            log_path = create_logfile(module_name, application, backup_type)
             module = load_module_ex(module_name)
             assert module is not None
-            result = module.run(config)
+            result = module.run(config, service)
             backup_results.append(result)
         except (ModuleNotFoundError, AttributeError, FileNotFoundError, ImportError) as e:
             logging.error(get_error_message(ErrorCode.MODULE_FAIL_TO_LOAD, file=module_name, error_type=type(e).__name__, error=e))
             backup_results.append({
-                "application": config["application"],
+                "application": application,
                 "success": False,
                 "error_message": ErrorCode.MODULE_FAIL_TO_LOAD,
             })
+        finally:
+            if collector.records:
+                log_content = [collector.format(record) for record in collector.records]
+                log_content = "\n".join(log_content)
+                write_log(log_path, log_content)
+                collector.records.clear()
 
-if __name__ == '__main__':
-    configs = load_config()
-    run()
-
-    if collector.records:
-        messages = [collector.format(record) for record in collector.records]
-
-        messages = "\n".join(messages)
-        send_message(messages)
     summary_message = generate_summary(backup_results)
     send_message(summary_message)
+
+
+if __name__ == '__main__':
+    check_deploy_environment()
+    run()

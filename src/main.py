@@ -20,6 +20,8 @@ import socket
 import os
 import concurrent.futures
 
+VERSION = "1.0"
+
 LOCATION = ""
 SERVER = ""
 
@@ -50,7 +52,6 @@ def load_module_ex(module_name:str) -> ModuleType | None:
     entry_point = f"{module_name}.{MODULE_EXTENSION}"
 
     module_path = PACKAGE_DIR / module_name / entry_point
-    print(f"module_path: {module_path}")
     
     if not module_path.is_file():
         raise FileNotFoundError(get_error_message(ErrorCode.MODULE_FILE_NOT_FOUND, file=module_name))
@@ -134,6 +135,10 @@ def execute_module(config:Dict, module:ModuleType) ->List:
         })
     return result_list
 
+def print_banner():
+    print(f"Backup Agent - version: {VERSION}")
+    print("--------------------------------------------")
+
 def run():
     # set up logging
     log_path = LOG_DIR / f"{get_timestamp()}_BackupAgent.log"
@@ -162,5 +167,8 @@ def run():
 
 
 if __name__ == '__main__':
+    print_banner()
     check_deploy_environment()
+    print(" [i] Backup is in process...")
     run()
+    print(" [i] Backup completed.")

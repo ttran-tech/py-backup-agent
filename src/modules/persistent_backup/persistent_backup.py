@@ -75,6 +75,8 @@ def run(params:Dict, service) -> Dict:
         f"/LOG+:{log_path}",
     ]
 
+    print(f" [-] Start backup {app_name}. Type: {backup_type}")
+
     logger.info(f"Execute Command: {" ".join(command)}")
     result = subprocess.run(command, text=True, errors="replace", check=False, stdout=subprocess.DEVNULL)
     source_size = get_directory_size(src_path)
@@ -87,9 +89,10 @@ def run(params:Dict, service) -> Dict:
         response_message = f"[{app_name}] at [{location}]: Robocopy failed to execute. *{error_message}* | Status: [FAILED] | {size_message}"
         logger.error(response_message)
     else:
-        response_message = f"Backup job for [{app_name}] at [{location}] has finished successfully. | {size_message}"
+        response_message = f"Backup job for [{app_name}] at [{location}] has finished | Status: [SUCCESS] | {size_message}"
         logger.info(response_message)
     service.send_message(response_message)
+    print(f" [i] Backup {app_name} completed.")
     return {
         "application": app_name,
         "success": (False if exit_code >= 8 else True),

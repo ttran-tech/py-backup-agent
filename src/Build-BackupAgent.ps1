@@ -40,12 +40,14 @@ function Invoke-Main() {
                 &$pythonExec -m nuitka --mode=standalone --output-dir=build --output-filename=BackupAgent.exe --include-data-files=setting.json=setting.json --windows-icon-from-ico=icon.ico --remove-output main.py
 
                 Copy-Item ".\\deploy" "$build_dir\\main.dist\\deploy" -Force -Recurse
+                Copy-Item ".\\setting.json" "$build_dir\\main.dist\\" -Force
                 New-Item -Path "$build_dir\\main.dist\\logs" -ItemType Directory
             }
             elseif ($BuildMode -eq "onefile") {
                 &$pythonExec -m nuitka --mode=onefile --output-dir=build --output-filename=BackupAgent.exe --include-data-files=setting.json=setting.json --windows-icon-from-ico=icon.ico --remove-output main.py
 
                 Copy-Item ".\\deploy" "$build_dir\\deploy" -Force -Recurse
+                Copy-Item ".\\setting.json" "$build_dir" -Force -Recurse
                 New-Item -Path "$build_dir\\logs" -ItemType Directory
             }
             else {

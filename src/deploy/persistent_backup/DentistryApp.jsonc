@@ -5,6 +5,7 @@
     "location": "Office1",
     "server": "DC1",
     "type": "Persistent",
+    "enable": 1,
     "method": "robocopy",
     "targetDirectory": "FlatData",
     "sourcePath": "C:\\Workspace\\python\\BackupTest\\Source\\FlatData",

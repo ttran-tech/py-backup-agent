@@ -5,6 +5,7 @@
     "location": "Office1",
     "server": "DC1",
     "type": "Persistent",
+    "enable": 0,
     "method": "robocopy",
     "targetDirectory": "",
     "sourcePath": "C:\\Workspace\\python\\BackupTest\\Source\\DentiView_Imaging",

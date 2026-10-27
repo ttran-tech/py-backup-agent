@@ -143,11 +143,16 @@ def run():
     # set up logging
     log_path = LOG_DIR / f"{get_timestamp()}_BackupAgent.log"
     logging.basicConfig(filename=log_path, level=logging.INFO, format="%(asctime)s - %(levelname)s: %(message)s", datefmt="[%Y-%m-%d %H:%M:%S]")
+    enabled_configs = []
     configs = load_config()
+    for config in configs:
+        enable = int(config["enable"])
+        if bool(enable):
+            enabled_configs.append(config)
     module_registry = {}
     # To avoid race condition when BackupAgent tries to load the same module for the same backup job,
     # load and register the module to the module_registry to ensure a module is only loaded once.
-    for config in configs:
+    for config in enabled_configs:
         module_name = config["module"]
         if module_name not in module_registry.keys():
             try:
@@ -159,11 +164,11 @@ def run():
     # for config in configs:
     #     backup_results.extend(execute_module(config=config))
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-        futures = [executor.submit(execute_module, config, module_registry[config["module"]]) for config in configs]
+        futures = [executor.submit(execute_module, config, module_registry[config["module"]]) for config in enabled_configs]
         for future in concurrent.futures.as_completed(futures):
             backup_results.extend(future.result())
     summary_message = generate_summary(backup_results)
-    send_message(summary_message)
+    # send_message(summary_message)
 
 
 if __name__ == '__main__':

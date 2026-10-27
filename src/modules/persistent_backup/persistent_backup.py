@@ -72,11 +72,11 @@ def run(params:Dict, service) -> Dict:
         "/w:5",  # waiting time between each retry in seconds
         "/Z",   # the copy file can be interrupted, allow robocopy to continue where it left off
         "/NP",   # no show percentate
-        f"/LOG+:{log_path}"
+        f"/LOG+:{log_path}",
     ]
 
     logger.info(f"Execute Command: {" ".join(command)}")
-    result = subprocess.run(command, text=True, errors="replace", check=False)
+    result = subprocess.run(command, text=True, errors="replace", check=False, stdout=subprocess.DEVNULL)
     source_size = get_directory_size(src_path)
     backup_size = get_directory_size(dest_path)
     size_message = f"Size of Source: {source_size} bytes | Size of Backup: {backup_size} bytes"

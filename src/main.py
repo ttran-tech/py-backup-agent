@@ -5,7 +5,7 @@ from datetime import date
 
 from log import LogCollector, create_logfile, write_log
 from setting import BASE_DIR, MODULE_EXTENSION, BASE_FILES, PACKAGE_DIR, LOG_DIR
-from setting import check_deploy_environment, load_setting
+from setting import check_deploy_environment, load_setting, print_file_info
 from error import get_error_message, ErrorCode
 from discord import send_message
 from common import get_timestamp
@@ -20,7 +20,8 @@ import socket
 import os
 import concurrent.futures
 
-VERSION = "1.0"
+VERSION = "1.1.0"
+AUTHOR = "duy@ttran.tech"
 
 LOCATION = ""
 SERVER = ""
@@ -136,9 +137,14 @@ def execute_module(config:Dict, module:ModuleType) ->List:
     return result_list
 
 def print_banner():
-    print(f"Backup Agent - version: {VERSION}")
-    print("--------------------------------------------")
-
+    print("    ____             __                  ___                    __ ")
+    print("   / __ )____ ______/ /____  ______     /   | ____ ____  ____  / /_")
+    print("  / __  / __ `/ ___/ //_/ / / / __ \\   / /| |/ __ `/ _ \\/ __ \\/ __/")
+    print(" / /_/ / /_/ / /__/ ,< / /_/ / /_/ /  / ___ / /_/ /  __/ / / / /_  ")
+    print("/_____/\\__,_/\\___/_/|_|\\__,_/ .___/  /_/  |_\\__, /\\___/_/ /_/\\__/  ")
+    print("                           /_/             /____/                  ")
+    print(f"{'─'*50} v{VERSION} | {AUTHOR}")
+    
 def run():
     # set up logging
     log_path = LOG_DIR / f"{get_timestamp()}_BackupAgent.log"
@@ -168,11 +174,12 @@ def run():
         for future in concurrent.futures.as_completed(futures):
             backup_results.extend(future.result())
     summary_message = generate_summary(backup_results)
-    # send_message(summary_message)
+    send_message(summary_message)
 
 
 if __name__ == '__main__':
     print_banner()
+    #print_file_info()
     check_deploy_environment()
     print(" [i] Backup is in process...")
     run()
